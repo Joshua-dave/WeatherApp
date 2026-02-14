@@ -13,7 +13,6 @@
     --bg1:#2c2a35;
     --bg2:#1a181f;
     --card-bg:rgba(255,255,255,0.08);
-    --text:#fff;
     --accent:#4a90e2;
 }
 
@@ -35,19 +34,14 @@ body{
     height:812px;
     border-radius:40px;
     overflow:hidden;
-    background:inherit;
     box-shadow:0 20px 40px rgba(0,0,0,0.6);
-    display:flex;
-    flex-direction:column;
-    animation:fadeIn 1s ease;
 }
 
 .content{
     padding:30px 20px;
     display:flex;
     flex-direction:column;
-    align-items:center;
-    flex:1;
+    height:100%;
 }
 
 .search-box{
@@ -55,7 +49,6 @@ body{
     background:var(--card-bg);
     border-radius:20px;
     padding:12px 20px;
-    width:100%;
     margin-bottom:25px;
     animation:slideDown 0.8s ease;
 }
@@ -76,78 +69,44 @@ body{
     cursor:pointer;
 }
 
-.weather-display{
-    text-align:center;
-    margin-bottom:20px;
-    opacity:0;
-    transform:translateY(10px);
-    transition:all 0.5s ease;
-}
-
-.weather-display.show{
-    opacity:1;
-    transform:translateY(0);
-}
-
-.weather-icon{
-    font-size:80px;
-    margin-bottom:15px;
-    animation:float 3s ease-in-out infinite;
-}
-
-.temp{
-    font-size:72px;
-    font-weight:600;
-}
-
+.weather-display,
 .weather-details{
-    display:flex;
-    justify-content:space-around;
-    width:100%;
-    background:var(--card-bg);
-    border-radius:20px;
-    padding:15px;
-    margin-bottom:25px;
     opacity:0;
     transform:translateY(10px);
-    transition:all 0.5s ease;
+    transition:0.5s ease;
 }
 
+.weather-display.show,
 .weather-details.show{
     opacity:1;
     transform:translateY(0);
 }
 
-.detail{
-    text-align:center;
-    font-size:13px;
-    color:#ccc;
-}
+.weather-display{text-align:center;margin-bottom:20px;}
+.weather-icon{font-size:80px;margin-bottom:15px;animation:float 3s infinite;}
+.temp{font-size:72px;font-weight:600;}
 
-.detail i{
-    display:block;
-    margin-bottom:5px;
-    color:white;
+.weather-details{
+    display:flex;
+    justify-content:space-around;
+    background:var(--card-bg);
+    border-radius:20px;
+    padding:15px;
+    margin-bottom:25px;
 }
 
 .music-card{
-    width:100%;
+    margin-top:auto;
     background:rgba(255,255,255,0.1);
     border-radius:30px;
     padding:25px;
     text-align:center;
-    margin-top:auto;
     animation:slideUp 1s ease;
 }
 
-#track-name{font-weight:600;}
-#artist-name{font-size:14px;color:#ccc;margin-bottom:15px;}
+#artist-name{color:#ccc;font-size:14px;margin-bottom:15px;}
 
-audio{
-    width:100%;
-    filter:invert(1);
-    margin-bottom:15px;
-}
+audio{width:100%;filter:invert(1);margin-bottom:15px;}
 
 .btn-generate{
     background:var(--accent);
@@ -160,32 +119,14 @@ audio{
     transition:0.3s;
 }
 
-.btn-generate:hover{
-    transform:scale(1.05);
-}
+.btn-generate:hover{transform:scale(1.05);}
 
 .loading{display:none;color:var(--accent);}
 .error{display:none;color:#ff6b6b;text-align:center;margin-bottom:10px;}
 
-@keyframes fadeIn{
-    from{opacity:0}
-    to{opacity:1}
-}
-
-@keyframes slideUp{
-    from{transform:translateY(40px);opacity:0}
-    to{transform:translateY(0);opacity:1}
-}
-
-@keyframes slideDown{
-    from{transform:translateY(-30px);opacity:0}
-    to{transform:translateY(0);opacity:1}
-}
-
-@keyframes float{
-    0%,100%{transform:translateY(0)}
-    50%{transform:translateY(-8px)}
-}
+@keyframes slideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-30px)}to{opacity:1}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 </style>
 </head>
 
@@ -195,7 +136,7 @@ audio{
 <div class="content">
 
 <div class="search-box">
-<input type="text" id="city-input" placeholder="Search City...">
+<input id="city-input" placeholder="Search City...">
 <button id="search-btn"><i class="fas fa-search"></i></button>
 </div>
 
@@ -210,14 +151,14 @@ audio{
 </div>
 
 <div class="weather-details" id="details-ui">
-<div class="detail"><i class="fas fa-wind"></i><span id="ui-wind"></span></div>
-<div class="detail"><i class="fas fa-tint"></i><span id="ui-hum"></span></div>
-<div class="detail"><i class="fas fa-sun"></i>UV: <span id="ui-uv"></span></div>
+<div><i class="fas fa-wind"></i> <span id="ui-wind"></span></div>
+<div><i class="fas fa-tint"></i> <span id="ui-hum"></span></div>
+<div>UV <span id="ui-uv"></span></div>
 </div>
 
 <div class="music-card">
-<span id="track-name">Find a city</span><br>
-<span id="artist-name">to match the vibe</span>
+<div id="track-name">Find a city</div>
+<div id="artist-name">to match the vibe</div>
 <audio id="player" controls></audio>
 <button class="btn-generate" id="refresh-music">New Song</button>
 </div>
@@ -226,102 +167,81 @@ audio{
 </div>
 
 <script>
-const W_KEY='6ebe7ba0e7944032a8331954261402';
-const J_ID='56d30862';
+const W_KEY="6ebe7ba0e7944032a8331954261402";
+const DISCOVERY="https://discoveryprovider.audius.co";
 
-const searchBtn=document.getElementById('search-btn');
-const cityInput=document.getElementById('city-input');
-const refreshBtn=document.getElementById('refresh-music');
-const player=document.getElementById('player');
-
-let playlist=[];
+const player=document.getElementById("player");
+const playlist=[];
+let index=0;
 
 async function initSearch(){
-const city=cityInput.value.trim();
+const city=document.getElementById("city-input").value.trim();
 if(!city) return;
 
 showLoading(true);
 showError("");
 
 try{
-const wRes=await fetch(`https://api.weatherapi.com/v1/current.json?key=${W_KEY}&q=${city}`);
-if(!wRes.ok) throw new Error("City not found");
-const wData=await wRes.json();
-updateWeatherUI(wData);
+const res=await fetch(`https://api.weatherapi.com/v1/current.json?key=${W_KEY}&q=${city}`);
+if(!res.ok) throw new Error("City not found");
+const data=await res.json();
 
-const mood=getMood(wData.current.condition.code);
+updateWeatherUI(data);
+const mood=getMood(data.current.condition.code);
 await fetchMusic(mood);
 
-}catch(err){
-showError(err.message);
-}
+}catch(e){showError(e.message)}
 showLoading(false);
 }
 
 async function fetchMusic(mood){
-try{
-const url=`https://api.jamendo.com/v3.0/tracks/?client_id=${J_ID}&format=json&limit=30&fuzzytags=${mood}&audioformat=mp32`;
-const proxy=`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-const response=await fetch(proxy);
-const data=await response.json();
-
-playlist=data.results.filter(t=>t.audio);
-if(playlist.length===0) throw new Error("No tracks");
-
-playRandom();
-
-}catch{
-showError("Music service unavailable");
-}
+const res=await fetch(`${DISCOVERY}/v1/tracks/search?query=${mood}&limit=20`);
+const data=await res.json();
+playlist.length=0;
+playlist.push(...data.data);
+index=0;
+playTrack();
 }
 
-function playRandom(){
-const track=playlist[Math.floor(Math.random()*playlist.length)];
-document.getElementById('track-name').textContent=track.name;
-document.getElementById('artist-name').textContent=track.artist_name;
-player.src=track.audio;
+function playTrack(){
+if(!playlist.length) return;
+const t=playlist[index%playlist.length];
+document.getElementById("track-name").textContent=t.title;
+document.getElementById("artist-name").textContent=t.user.name;
+player.src=`${DISCOVERY}/v1/tracks/${t.id}/stream`;
 player.play().catch(()=>{});
+index++;
 }
 
-player.addEventListener('ended',playRandom);
+player.addEventListener("ended",playTrack);
+document.getElementById("refresh-music").onclick=playTrack;
+document.getElementById("search-btn").onclick=initSearch;
 
-function updateWeatherUI(data){
-document.getElementById('ui-city').textContent=data.location.name;
-document.getElementById('ui-temp').textContent=Math.round(data.current.temp_c);
-document.getElementById('ui-desc').textContent=data.current.condition.text;
-document.getElementById('ui-wind').textContent=data.current.wind_kph+" kph";
-document.getElementById('ui-hum').textContent=data.current.humidity+"%";
-document.getElementById('ui-uv').textContent=data.current.uv;
-
-document.getElementById('weather-ui').classList.add('show');
-document.getElementById('details-ui').classList.add('show');
-
-if(data.current.condition.code===1000)
-document.body.style.background="linear-gradient(to bottom,#f7971e,#ffd200)";
-else if(data.current.condition.code<=1009)
-document.body.style.background="linear-gradient(to bottom,#757f9a,#d7dde8)";
-else
-document.body.style.background="linear-gradient(to bottom,#314755,#26a0da)";
+function updateWeatherUI(d){
+document.getElementById("ui-city").textContent=d.location.name;
+document.getElementById("ui-temp").textContent=Math.round(d.current.temp_c);
+document.getElementById("ui-desc").textContent=d.current.condition.text;
+document.getElementById("ui-wind").textContent=d.current.wind_kph+" kph";
+document.getElementById("ui-hum").textContent=d.current.humidity+"%";
+document.getElementById("ui-uv").textContent=d.current.uv;
+document.getElementById("weather-ui").classList.add("show");
+document.getElementById("details-ui").classList.add("show");
 }
 
-function getMood(code){
-if(code===1000) return "pop,happy,upbeat";
-if(code<=1009) return "chill,ambient";
-if(code>=1063) return "lofi,rain";
+function getMood(c){
+if(c===1000) return "happy pop";
+if(c<=1009) return "chill ambient";
+if(c>=1063) return "lofi rain";
 return "relaxing";
 }
 
-function showLoading(s){document.getElementById('loading').style.display=s?'block':'none';}
+function showLoading(s){document.getElementById("loading").style.display=s?"block":"none";}
 function showError(m){
-const e=document.getElementById('error');
-if(!m){e.style.display='none';return;}
+const e=document.getElementById("error");
+if(!m){e.style.display="none";return;}
 e.textContent=m;
-e.style.display='block';
+e.style.display="block";
 }
-
-searchBtn.addEventListener('click',initSearch);
-refreshBtn.addEventListener('click',playRandom);
-cityInput.addEventListener('keypress',e=>{if(e.key==='Enter')initSearch();});
 </script>
 
 </body>
