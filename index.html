@@ -49,8 +49,7 @@ body{
     background:var(--card-bg);
     border-radius:20px;
     padding:12px 20px;
-    margin-bottom:25px;
-    animation:slideDown 0.8s ease;
+    margin-bottom:20px;
 }
 
 .search-box input{
@@ -69,11 +68,14 @@ body{
     cursor:pointer;
 }
 
+.loading{display:none;color:var(--accent);margin-bottom:10px;}
+.error{display:none;color:#ff6b6b;margin-bottom:10px;text-align:center;}
+
 .weather-display,
 .weather-details{
     opacity:0;
     transform:translateY(10px);
-    transition:0.5s ease;
+    transition:0.4s ease;
 }
 
 .weather-display.show,
@@ -83,7 +85,7 @@ body{
 }
 
 .weather-display{text-align:center;margin-bottom:20px;}
-.weather-icon{font-size:80px;margin-bottom:15px;animation:float 3s infinite;}
+.weather-icon{font-size:80px;margin-bottom:15px;}
 .temp{font-size:72px;font-weight:600;}
 
 .weather-details{
@@ -101,7 +103,6 @@ body{
     border-radius:30px;
     padding:25px;
     text-align:center;
-    animation:slideUp 1s ease;
 }
 
 #artist-name{color:#ccc;font-size:14px;margin-bottom:15px;}
@@ -120,13 +121,6 @@ audio{width:100%;filter:invert(1);margin-bottom:15px;}
 }
 
 .btn-generate:hover{transform:scale(1.05);}
-
-.loading{display:none;color:var(--accent);}
-.error{display:none;color:#ff6b6b;text-align:center;margin-bottom:10px;}
-
-@keyframes slideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1}}
-@keyframes slideDown{from{opacity:0;transform:translateY(-30px)}to{opacity:1}}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 </style>
 </head>
 
@@ -171,7 +165,7 @@ const W_KEY="6ebe7ba0e7944032a8331954261402";
 const DISCOVERY="https://discoveryprovider.audius.co";
 
 const player=document.getElementById("player");
-const playlist=[];
+let playlist=[];
 let index=0;
 
 async function initSearch(){
@@ -182,40 +176,61 @@ showLoading(true);
 showError("");
 
 try{
-const res=await fetch(`https://api.weatherapi.com/v1/current.json?key=${W_KEY}&q=${city}`);
-if(!res.ok) throw new Error("City not found");
-const data=await res.json();
+const response=await fetch(
+`https://api.weatherapi.com/v1/current.json?key=${W_KEY}&q=${encodeURIComponent(city)}&aqi=no`
+);
 
+if(!response.ok){
+const errorData=await response.json();
+throw new Error(errorData.error?.message || "City not found");
+}
+
+const data=await response.json();
 updateWeatherUI(data);
+
 const mood=getMood(data.current.condition.code);
 await fetchMusic(mood);
 
-}catch(e){showError(e.message)}
+}catch(err){
+console.error(err);
+showError(err.message);
+}
+
 showLoading(false);
 }
 
 async function fetchMusic(mood){
-const res=await fetch(`${DISCOVERY}/v1/tracks/search?query=${mood}&limit=20`);
+try{
+const res=await fetch(`${DISCOVERY}/v1/tracks/search?query=${encodeURIComponent(mood)}&limit=20`);
 const data=await res.json();
-playlist.length=0;
-playlist.push(...data.data);
+
+if(!data.data || data.data.length===0){
+throw new Error("No tracks found");
+}
+
+playlist=data.data;
 index=0;
 playTrack();
+
+}catch{
+showError("Music service unavailable");
+}
 }
 
 function playTrack(){
 if(!playlist.length) return;
-const t=playlist[index%playlist.length];
-document.getElementById("track-name").textContent=t.title;
-document.getElementById("artist-name").textContent=t.user.name;
-player.src=`${DISCOVERY}/v1/tracks/${t.id}/stream`;
+const track=playlist[index % playlist.length];
+
+document.getElementById("track-name").textContent=track.title;
+document.getElementById("artist-name").textContent=track.user.name;
+
+player.src=`${DISCOVERY}/v1/tracks/${track.id}/stream`;
 player.play().catch(()=>{});
+
 index++;
 }
 
 player.addEventListener("ended",playTrack);
-document.getElementById("refresh-music").onclick=playTrack;
-document.getElementById("search-btn").onclick=initSearch;
 
 function updateWeatherUI(d){
 document.getElementById("ui-city").textContent=d.location.name;
@@ -224,24 +239,34 @@ document.getElementById("ui-desc").textContent=d.current.condition.text;
 document.getElementById("ui-wind").textContent=d.current.wind_kph+" kph";
 document.getElementById("ui-hum").textContent=d.current.humidity+"%";
 document.getElementById("ui-uv").textContent=d.current.uv;
+
 document.getElementById("weather-ui").classList.add("show");
 document.getElementById("details-ui").classList.add("show");
 }
 
-function getMood(c){
-if(c===1000) return "happy pop";
-if(c<=1009) return "chill ambient";
-if(c>=1063) return "lofi rain";
+function getMood(code){
+if(code===1000) return "happy pop";
+if(code<=1009) return "chill ambient";
+if(code>=1063) return "lofi rain";
 return "relaxing";
 }
 
-function showLoading(s){document.getElementById("loading").style.display=s?"block":"none";}
+function showLoading(s){
+document.getElementById("loading").style.display=s?"block":"none";
+}
+
 function showError(m){
 const e=document.getElementById("error");
 if(!m){e.style.display="none";return;}
 e.textContent=m;
 e.style.display="block";
 }
+
+document.getElementById("search-btn").onclick=initSearch;
+document.getElementById("refresh-music").onclick=playTrack;
+document.getElementById("city-input").addEventListener("keypress",e=>{
+if(e.key==="Enter") initSearch();
+});
 </script>
 
 </body>
