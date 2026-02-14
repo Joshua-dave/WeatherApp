@@ -1,40 +1,331 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather Vibe Player</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --bg-gradient: linear-gradient(to bottom, #2c2a35, #1a181f);
-            --card-bg: rgba(255, 255, 255, 0.08);
-            --text-primary: #ffffff;
-            --text-secondary: #a0a0a0;
-            --accent-blue: #4a90e2;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weather Vibe Player</title>
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #0f0f0f;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            color: var(--text-primary);
-        }
+<style>
+:root{
+    --bg1:#2c2a35;
+    --bg2:#1a181f;
+    --card-bg:rgba(255,255,255,0.08);
+    --text:#fff;
+    --accent:#4a90e2;
+}
 
-        .phone-container {
-            width: 375px;
-            height: 812px;
-            background: var(--bg-gradient);
-            border-radius: 40px;
-            overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-            display: flex;
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+    font-family:'Poppins',sans-serif;
+    background:linear-gradient(to bottom,var(--bg1),var(--bg2));
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    color:white;
+    transition:background 0.8s ease;
+}
+
+.phone-container{
+    width:375px;
+    height:812px;
+    border-radius:40px;
+    overflow:hidden;
+    background:inherit;
+    box-shadow:0 20px 40px rgba(0,0,0,0.6);
+    display:flex;
+    flex-direction:column;
+    animation:fadeIn 1s ease;
+}
+
+.content{
+    padding:30px 20px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    flex:1;
+}
+
+.search-box{
+    display:flex;
+    background:var(--card-bg);
+    border-radius:20px;
+    padding:12px 20px;
+    width:100%;
+    margin-bottom:25px;
+    animation:slideDown 0.8s ease;
+}
+
+.search-box input{
+    flex:1;
+    background:none;
+    border:none;
+    color:white;
+    outline:none;
+    font-size:16px;
+}
+
+.search-box button{
+    background:none;
+    border:none;
+    color:#aaa;
+    cursor:pointer;
+}
+
+.weather-display{
+    text-align:center;
+    margin-bottom:20px;
+    opacity:0;
+    transform:translateY(10px);
+    transition:all 0.5s ease;
+}
+
+.weather-display.show{
+    opacity:1;
+    transform:translateY(0);
+}
+
+.weather-icon{
+    font-size:80px;
+    margin-bottom:15px;
+    animation:float 3s ease-in-out infinite;
+}
+
+.temp{
+    font-size:72px;
+    font-weight:600;
+}
+
+.weather-details{
+    display:flex;
+    justify-content:space-around;
+    width:100%;
+    background:var(--card-bg);
+    border-radius:20px;
+    padding:15px;
+    margin-bottom:25px;
+    opacity:0;
+    transform:translateY(10px);
+    transition:all 0.5s ease;
+}
+
+.weather-details.show{
+    opacity:1;
+    transform:translateY(0);
+}
+
+.detail{
+    text-align:center;
+    font-size:13px;
+    color:#ccc;
+}
+
+.detail i{
+    display:block;
+    margin-bottom:5px;
+    color:white;
+}
+
+.music-card{
+    width:100%;
+    background:rgba(255,255,255,0.1);
+    border-radius:30px;
+    padding:25px;
+    text-align:center;
+    margin-top:auto;
+    animation:slideUp 1s ease;
+}
+
+#track-name{font-weight:600;}
+#artist-name{font-size:14px;color:#ccc;margin-bottom:15px;}
+
+audio{
+    width:100%;
+    filter:invert(1);
+    margin-bottom:15px;
+}
+
+.btn-generate{
+    background:var(--accent);
+    border:none;
+    padding:15px;
+    border-radius:20px;
+    width:100%;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.btn-generate:hover{
+    transform:scale(1.05);
+}
+
+.loading{display:none;color:var(--accent);}
+.error{display:none;color:#ff6b6b;text-align:center;margin-bottom:10px;}
+
+@keyframes fadeIn{
+    from{opacity:0}
+    to{opacity:1}
+}
+
+@keyframes slideUp{
+    from{transform:translateY(40px);opacity:0}
+    to{transform:translateY(0);opacity:1}
+}
+
+@keyframes slideDown{
+    from{transform:translateY(-30px);opacity:0}
+    to{transform:translateY(0);opacity:1}
+}
+
+@keyframes float{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-8px)}
+}
+</style>
+</head>
+
+<body>
+
+<div class="phone-container">
+<div class="content">
+
+<div class="search-box">
+<input type="text" id="city-input" placeholder="Search City...">
+<button id="search-btn"><i class="fas fa-search"></i></button>
+</div>
+
+<div id="loading" class="loading">Searching...</div>
+<div id="error" class="error"></div>
+
+<div class="weather-display" id="weather-ui">
+<span id="ui-city"></span>
+<i id="ui-icon" class="fas fa-sun weather-icon"></i>
+<div class="temp"><span id="ui-temp"></span>°C</div>
+<p id="ui-desc"></p>
+</div>
+
+<div class="weather-details" id="details-ui">
+<div class="detail"><i class="fas fa-wind"></i><span id="ui-wind"></span></div>
+<div class="detail"><i class="fas fa-tint"></i><span id="ui-hum"></span></div>
+<div class="detail"><i class="fas fa-sun"></i>UV: <span id="ui-uv"></span></div>
+</div>
+
+<div class="music-card">
+<span id="track-name">Find a city</span><br>
+<span id="artist-name">to match the vibe</span>
+<audio id="player" controls></audio>
+<button class="btn-generate" id="refresh-music">New Song</button>
+</div>
+
+</div>
+</div>
+
+<script>
+const W_KEY='6ebe7ba0e7944032a8331954261402';
+const J_ID='56d30862';
+
+const searchBtn=document.getElementById('search-btn');
+const cityInput=document.getElementById('city-input');
+const refreshBtn=document.getElementById('refresh-music');
+const player=document.getElementById('player');
+
+let playlist=[];
+
+async function initSearch(){
+const city=cityInput.value.trim();
+if(!city) return;
+
+showLoading(true);
+showError("");
+
+try{
+const wRes=await fetch(`https://api.weatherapi.com/v1/current.json?key=${W_KEY}&q=${city}`);
+if(!wRes.ok) throw new Error("City not found");
+const wData=await wRes.json();
+updateWeatherUI(wData);
+
+const mood=getMood(wData.current.condition.code);
+await fetchMusic(mood);
+
+}catch(err){
+showError(err.message);
+}
+showLoading(false);
+}
+
+async function fetchMusic(mood){
+try{
+const url=`https://api.jamendo.com/v3.0/tracks/?client_id=${J_ID}&format=json&limit=30&fuzzytags=${mood}&audioformat=mp32`;
+const proxy=`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+const response=await fetch(proxy);
+const data=await response.json();
+
+playlist=data.results.filter(t=>t.audio);
+if(playlist.length===0) throw new Error("No tracks");
+
+playRandom();
+
+}catch{
+showError("Music service unavailable");
+}
+}
+
+function playRandom(){
+const track=playlist[Math.floor(Math.random()*playlist.length)];
+document.getElementById('track-name').textContent=track.name;
+document.getElementById('artist-name').textContent=track.artist_name;
+player.src=track.audio;
+player.play().catch(()=>{});
+}
+
+player.addEventListener('ended',playRandom);
+
+function updateWeatherUI(data){
+document.getElementById('ui-city').textContent=data.location.name;
+document.getElementById('ui-temp').textContent=Math.round(data.current.temp_c);
+document.getElementById('ui-desc').textContent=data.current.condition.text;
+document.getElementById('ui-wind').textContent=data.current.wind_kph+" kph";
+document.getElementById('ui-hum').textContent=data.current.humidity+"%";
+document.getElementById('ui-uv').textContent=data.current.uv;
+
+document.getElementById('weather-ui').classList.add('show');
+document.getElementById('details-ui').classList.add('show');
+
+if(data.current.condition.code===1000)
+document.body.style.background="linear-gradient(to bottom,#f7971e,#ffd200)";
+else if(data.current.condition.code<=1009)
+document.body.style.background="linear-gradient(to bottom,#757f9a,#d7dde8)";
+else
+document.body.style.background="linear-gradient(to bottom,#314755,#26a0da)";
+}
+
+function getMood(code){
+if(code===1000) return "pop,happy,upbeat";
+if(code<=1009) return "chill,ambient";
+if(code>=1063) return "lofi,rain";
+return "relaxing";
+}
+
+function showLoading(s){document.getElementById('loading').style.display=s?'block':'none';}
+function showError(m){
+const e=document.getElementById('error');
+if(!m){e.style.display='none';return;}
+e.textContent=m;
+e.style.display='block';
+}
+
+searchBtn.addEventListener('click',initSearch);
+refreshBtn.addEventListener('click',playRandom);
+cityInput.addEventListener('keypress',e=>{if(e.key==='Enter')initSearch();});
+</script>
+
+</body>
+</html>            display: flex;
             flex-direction: column;
         }
 
